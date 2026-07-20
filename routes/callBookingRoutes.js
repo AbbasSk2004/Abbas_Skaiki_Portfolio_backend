@@ -1,22 +1,10 @@
 import express from 'express';
-import {
-  createCallBooking,
-  getAllCallBookings,
-  getCallBooking,
-  updateCallBooking,
-  deleteCallBooking,
-} from '../controllers/callBookingController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { createCallBooking } from '../controllers/callBookingController.js';
 
 const router = express.Router();
 
-// Public: visitors book a call
+// PUBLIC: visitors book a call. All admin read/manage routes now live under
+// /api/admin/bookings (routes/admin/callBookingRoutes.js), gated by protect + requireAdmin.
 router.post('/', createCallBooking);
-
-// Private: admin reads and manages bookings
-router.get('/', protect, getAllCallBookings);
-router.get('/:id', protect, getCallBooking);
-router.put('/:id', protect, updateCallBooking);
-router.delete('/:id', protect, deleteCallBooking);
 
 export default router;

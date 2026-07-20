@@ -7,3 +7,6 @@ node_modules/
 .env.local
 config/seed.js
 config/seedAdmin.js
+config/seed-extras.js
+config/seed-Approach.js
+config/seed*

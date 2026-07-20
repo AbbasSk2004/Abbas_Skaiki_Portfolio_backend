@@ -1,11 +1,10 @@
 import express from 'express';
-import { getAbout, updateAbout } from '../controllers/aboutController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getAbout } from '../controllers/aboutController.js';
 
 const router = express.Router();
 
-// About is a singleton: only a public read and a private update are needed.
+// About is a singleton: PUBLIC read only. The private upsert now lives at
+// PUT /api/admin/about (routes/admin/aboutRoutes.js), gated by protect + requireAdmin.
 router.get('/', getAbout);
-router.put('/', protect, updateAbout);
 
 export default router;

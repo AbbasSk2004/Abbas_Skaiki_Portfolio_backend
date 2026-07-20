@@ -19,6 +19,9 @@ import aboutRoutes from './routes/aboutRoutes.js';
 import socialLinkRoutes from './routes/socialLinkRoutes.js';
 import drivenResultRoutes from './routes/drivenResultRoutes.js';
 
+// Private admin subtree — gated by protect + requireAdmin at its mount point.
+import adminRoutes from './routes/admin/index.js';
+
 // Load .env.local if present, otherwise fall back to .env
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -55,6 +58,10 @@ app.use('/api/social-links', socialLinkRoutes);
 app.use('/api/driven-results', drivenResultRoutes);
 import apiRoutes from './routes/apiRoutes.js';
 app.use('/api', apiRoutes);
+
+// --- Private admin API (all routes require a valid admin JWT cookie) ---
+app.use('/api/admin', adminRoutes);
+
 // --- Error handling ---
 app.use(notFound);
 app.use(globalErrorHandler);

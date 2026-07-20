@@ -45,8 +45,10 @@ export const getAbout = async (req, res) => {
 // GET /api/approach — approach steps in step order.
 export const getApproach = async (req, res) => {
   try {
-    const steps = await Approach.find().sort({ stepNumber: 1 });
-    return res.status(200).json({ success: true, data: steps });
+    // Approach is a singleton section (one image + text steps), so return the
+    // single document rather than a list.
+    const approach = await Approach.findOne().sort({ createdAt: 1 });
+    return res.status(200).json({ success: true, data: approach });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -148,7 +150,7 @@ export const getPortfolio = async (req, res) => {
     ] = await Promise.all([
       Hero.findOne().sort({ createdAt: -1 }),
       About.findOne().sort({ createdAt: -1 }),
-      Approach.find().sort({ stepNumber: 1 }),
+      Approach.findOne().sort({ createdAt: 1 }),
       Service.find().sort({ order: 1, createdAt: 1 }),
       Project.find().sort({ createdAt: -1 }),
       Testimonial.find().sort({ createdAt: 1 }),

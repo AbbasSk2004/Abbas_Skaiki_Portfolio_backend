@@ -1,22 +1,18 @@
 import express from 'express';
-import {
-  getAllProjects,
-  getProject,
-  createProject,
-  updateProject,
-  deleteProject,
-} from '../controllers/projectController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getAllProjects, getProject } from '../controllers/projectController.js';
 
 const router = express.Router();
 
-// Public reads
+// -----------------------------------------------------------------------------
+// PUBLIC project router — READ-ONLY.
+//
+// All writes (create/update/delete) have moved to the private admin subtree:
+//   back/routes/admin/projectRoutes.js  (mounted under /api/admin/projects,
+//   gated by protect + requireAdmin). This router now serves only the two
+//   public GETs, so there is zero chance of an unauthenticated mutation reaching
+//   this base path. Keep it that way — never re-add POST/PUT/DELETE here.
+// -----------------------------------------------------------------------------
 router.get('/', getAllProjects);
 router.get('/:id', getProject);
-
-// Private writes (admin only)
-router.post('/', protect, createProject);
-router.put('/:id', protect, updateProject);
-router.delete('/:id', protect, deleteProject);
 
 export default router;

@@ -1,5 +1,9 @@
 import DrivenResult from '../models/DrivenResult.js';
 
+// PUBLIC, read-only. Every write (create/update/delete) now lives in
+// controllers/admin/drivenResultController.js, reachable only under
+// /api/admin/driven-results (protect + requireAdmin).
+
 // GET /api/driven-results  (PUBLIC) — populates the referenced project when present
 export const getAllDrivenResults = async (req, res) => {
   try {
@@ -25,52 +29,6 @@ export const getDrivenResult = async (req, res) => {
         .json({ success: false, message: 'Driven result not found' });
     }
     return res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// POST /api/driven-results  (PRIVATE)
-export const createDrivenResult = async (req, res) => {
-  try {
-    const result = await DrivenResult.create(req.body);
-    return res.status(201).json({ success: true, data: result });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-// PUT /api/driven-results/:id  (PRIVATE)
-export const updateDrivenResult = async (req, res) => {
-  try {
-    const result = await DrivenResult.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!result) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Driven result not found' });
-    }
-    return res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-// DELETE /api/driven-results/:id  (PRIVATE)
-export const deleteDrivenResult = async (req, res) => {
-  try {
-    const result = await DrivenResult.findByIdAndDelete(req.params.id);
-    if (!result) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Driven result not found' });
-    }
-    return res
-      .status(200)
-      .json({ success: true, message: 'Driven result deleted successfully' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

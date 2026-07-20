@@ -25,48 +25,9 @@ export const getTechStack = async (req, res) => {
   }
 };
 
-// POST /api/tech-stacks  (PRIVATE)
-export const createTechStack = async (req, res) => {
-  try {
-    const techStack = await TechStack.create(req.body);
-    return res.status(201).json({ success: true, data: techStack });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-// PUT /api/tech-stacks/:id  (PRIVATE)
-export const updateTechStack = async (req, res) => {
-  try {
-    const techStack = await TechStack.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!techStack) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Tech stack not found' });
-    }
-    return res.status(200).json({ success: true, data: techStack });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-// DELETE /api/tech-stacks/:id  (PRIVATE)
-export const deleteTechStack = async (req, res) => {
-  try {
-    const techStack = await TechStack.findByIdAndDelete(req.params.id);
-    if (!techStack) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Tech stack not found' });
-    }
-    return res
-      .status(200)
-      .json({ success: true, message: 'Tech stack deleted successfully' });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
+// -----------------------------------------------------------------------------
+// Write handlers (create/update/delete) have MIGRATED to
+// controllers/admin/techStackController.js and are served under /api/admin/
+// tech-stacks behind the protect + requireAdmin gate. This public controller is
+// intentionally read-only — see routes/techStackRoutes.js.
+// -----------------------------------------------------------------------------

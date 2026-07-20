@@ -1,22 +1,11 @@
 import express from 'express';
-import {
-  getAllApproaches,
-  getApproach,
-  createApproach,
-  updateApproach,
-  deleteApproach,
-} from '../controllers/approachController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getAllApproaches } from '../controllers/approachController.js';
 
+// PUBLIC, read-only. Approach is now a SINGLETON section (one image + text
+// steps), so there is only a single GET — no by-id lookup. The write (upsert)
+// lives under PUT /api/admin/approaches behind protect + requireAdmin.
 const router = express.Router();
 
-// Public reads
 router.get('/', getAllApproaches);
-router.get('/:id', getApproach);
-
-// Private writes (admin only)
-router.post('/', protect, createApproach);
-router.put('/:id', protect, updateApproach);
-router.delete('/:id', protect, deleteApproach);
 
 export default router;

@@ -12,8 +12,7 @@ import {
   getProjectBySlug,
   getPortfolio,
 } from '../controllers/portfolioController.js';
-import { getContactInfo, updateContactInfo } from '../controllers/contactController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getContactInfo } from '../controllers/contactController.js';
 
 const router = express.Router();
 
@@ -38,10 +37,10 @@ const router = express.Router();
 router.get('/hero', getHero);
 router.get('/portfolio', getPortfolio);
 
-// Contact info singleton — public read, admin-only update. No dedicated
-// ContactInfo router is mounted in server.js, so /api/contact is free.
+// Contact info singleton — PUBLIC read only. The private upsert moved to
+// PUT /api/admin/contact (routes/admin/contactRoutes.js), gated by
+// protect + requireAdmin. No write is reachable from this public aggregator.
 router.get('/contact', getContactInfo);
-router.put('/contact', protect, updateContactInfo);
 
 // Slug lookup for /works/[slug]. Registered here because the existing
 // /api/projects/:id router matches by _id only. This lives under a distinct

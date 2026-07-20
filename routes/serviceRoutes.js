@@ -2,21 +2,15 @@ import express from 'express';
 import {
   getAllServices,
   getService,
-  createService,
-  updateService,
-  deleteService,
 } from '../controllers/serviceController.js';
-import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Public reads
+// PUBLIC read-only. Every write (POST/PUT/DELETE) now lives under
+// /api/admin/services (routes/admin/serviceRoutes.js), gated by protect +
+// requireAdmin. This router deliberately exposes GETs only — no auth needed,
+// no mutation surface.
 router.get('/', getAllServices);
 router.get('/:id', getService);
-
-// Private writes (admin only)
-router.post('/', protect, createService);
-router.put('/:id', protect, updateService);
-router.delete('/:id', protect, deleteService);
 
 export default router;

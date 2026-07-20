@@ -1,22 +1,11 @@
 import express from 'express';
-import {
-  getAllDrivenResults,
-  getDrivenResult,
-  createDrivenResult,
-  updateDrivenResult,
-  deleteDrivenResult,
-} from '../controllers/drivenResultController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { getAllDrivenResults, getDrivenResult } from '../controllers/drivenResultController.js';
 
+// PUBLIC, read-only. Every write now lives under /api/admin/driven-results
+// (routes/admin/drivenResultRoutes.js), gated by protect + requireAdmin.
 const router = express.Router();
 
-// Public reads
 router.get('/', getAllDrivenResults);
 router.get('/:id', getDrivenResult);
-
-// Private writes (admin only)
-router.post('/', protect, createDrivenResult);
-router.put('/:id', protect, updateDrivenResult);
-router.delete('/:id', protect, deleteDrivenResult);
 
 export default router;
