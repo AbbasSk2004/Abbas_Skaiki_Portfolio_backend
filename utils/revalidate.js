@@ -28,7 +28,9 @@ const FRONTEND_URL =
 export const revalidatePublicContent = async (tags) => {
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret) {
-    // Not configured yet — no-op rather than error, so nothing breaks.
+    // Not configured yet — no-op rather than error, so nothing breaks. Warn so
+    // this (the quietest failure mode) is visible in the logs instead of silent.
+    console.warn('[revalidate] REVALIDATE_SECRET not set — skipping revalidation ping.');
     return { ok: true, skipped: true };
   }
 
@@ -43,6 +45,7 @@ export const revalidatePublicContent = async (tags) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
         'x-revalidate-secret': secret,
       },
       body: JSON.stringify(Array.isArray(tags) && tags.length ? { tags } : {}),
@@ -51,10 +54,15 @@ export const revalidatePublicContent = async (tags) => {
     clearTimeout(timer);
 
     if (!res.ok) {
+      // Read the body so the logs reveal WHICH failure this is:
+      // 401 "Invalid secret" (secret mismatch) vs 500 "Revalidation not
+      // configured" (secret unset on the frontend) vs anything else.
+      const body = await res.text().catch(() => '');
       const msg = `revalidate returned ${res.status}`;
-      console.error(`[revalidate] ${msg} for ${url}`);
-      return { ok: false, status: res.status, error: msg };
+      console.error(`[revalidate] ${msg} for ${url} — ${body}`);
+      return { ok: false, status: res.status, error: msg, body };
     }
+    console.log(`[revalidate] ok ${res.status} ${url}`);
     return { ok: true, status: res.status };
   } catch (error) {
     // Network error, abort/timeout — log and move on. The DB write already
