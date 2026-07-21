@@ -16,7 +16,6 @@ const projectSchema = new mongoose.Schema(
     },
     category: { type: String, trim: true },
     tags: { type: [String], default: [] },
-    client: { type: String, trim: true },
     role: { type: String, trim: true },
     year: { type: Number },
     challenge: { type: String, trim: true },
@@ -24,6 +23,12 @@ const projectSchema = new mongoose.Schema(
     stack: { type: [String], default: [] },
     liveUrl: { type: String, trim: true },
     githubUrl: { type: String, trim: true },
+    // Dedicated cover image (card thumbnail / hero). Stored the same way as each
+    // entry in `images`: a single Cloudinary secure_url string (see upload.js /
+    // utils/cloudinary.js). Empty string when no cover has been set.
+    coverImage: { type: String, trim: true, default: '' },
+    // Gallery images shown on the case-study detail page. Cover lives separately
+    // in `coverImage` above, so this is gallery-only.
     images: { type: [String], default: [] },
     isPublished: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
