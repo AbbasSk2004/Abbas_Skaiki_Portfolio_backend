@@ -1,19 +1,25 @@
 import Project from '../models/Project.js';
 
-// GET /api/projects  (PUBLIC) — list all projects
+// GET /api/projects  (PUBLIC) — list published projects.
+// Pass ?featured=true to further restrict to homepage-featured projects.
 export const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: -1 });
+    const filter = { isPublished: true };
+    if (req.query.featured === 'true') filter.isFeatured = true;
+    const projects = await Project.find(filter).sort({ createdAt: -1 });
     return res.status(200).json({ success: true, data: projects });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// GET /api/projects/:id  (PUBLIC) — single project
+// GET /api/projects/:id  (PUBLIC) — single published project
 export const getProject = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({
+      _id: req.params.id,
+      isPublished: true,
+    });
     if (!project) {
       return res
         .status(404)

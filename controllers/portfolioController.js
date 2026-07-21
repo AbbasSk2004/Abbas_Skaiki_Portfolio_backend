@@ -121,6 +121,7 @@ export const getProjectBySlug = async (req, res) => {
   try {
     const project = await Project.findOne({
       slug: req.params.slug.toLowerCase(),
+      isPublished: true,
     });
     if (!project) {
       return res
@@ -152,7 +153,7 @@ export const getPortfolio = async (req, res) => {
       About.findOne().sort({ createdAt: -1 }),
       Approach.findOne().sort({ createdAt: 1 }),
       Service.find().sort({ order: 1, createdAt: 1 }),
-      Project.find().sort({ createdAt: -1 }),
+      Project.find({ isPublished: true }).sort({ createdAt: -1 }),
       Testimonial.find().sort({ createdAt: 1 }),
       DrivenResult.find().sort({ order: 1, createdAt: 1 }),
       TechStack.find().sort({ order: 1, createdAt: 1 }),

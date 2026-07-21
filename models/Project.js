@@ -25,6 +25,8 @@ const projectSchema = new mongoose.Schema(
     liveUrl: { type: String, trim: true },
     githubUrl: { type: String, trim: true },
     images: { type: [String], default: [] },
+    isPublished: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
