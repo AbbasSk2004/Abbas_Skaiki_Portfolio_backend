@@ -18,10 +18,13 @@
 // IMPORTANT: this is resolved lazily (inside the function below), NOT at module
 // load time. This file is imported transitively by server.js's import graph,
 // which runs BEFORE server.js calls dotenv.config(). Capturing process.env here
-// at the top level would read it before the .env is loaded and freeze the
-// localhost fallback forever — which is exactly the prod bug this fixes.
+// at the top level would read it before the .env is loaded and freeze the value
+// forever — which is exactly the prod bug this fixes.
+//
+// No localhost fallback on purpose: if neither var is set we SKIP with a clear
+// log rather than ping a bogus localhost URL and pollute the error log.
 const resolveFrontendUrl = () =>
-  process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+  process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || null;
 
 /**
  * Fire-and-forget revalidation of the public content cache. Resolves to a small
@@ -40,7 +43,14 @@ export const revalidatePublicContent = async (tags) => {
     return { ok: true, skipped: true };
   }
 
-  const url = `${resolveFrontendUrl().replace(/\/+$/, '')}/api/revalidate`;
+  const frontendUrl = resolveFrontendUrl();
+  if (!frontendUrl) {
+    // No target configured — skip loudly rather than construct a bogus URL.
+    console.warn('[revalidate] Skipping: FRONTEND_URL is not set in process.env');
+    return { ok: true, skipped: true };
+  }
+
+  const url = `${frontendUrl.replace(/\/+$/, '')}/api/revalidate`;
 
   try {
     // Guard against a hung frontend taking down the admin response path.
