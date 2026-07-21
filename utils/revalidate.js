@@ -14,7 +14,13 @@
 
 // Where the Next.js app is reachable from the backend. In dev this is the same
 // origin as CLIENT_ORIGIN; in prod set FRONTEND_URL explicitly.
-const FRONTEND_URL =
+//
+// IMPORTANT: this is resolved lazily (inside the function below), NOT at module
+// load time. This file is imported transitively by server.js's import graph,
+// which runs BEFORE server.js calls dotenv.config(). Capturing process.env here
+// at the top level would read it before the .env is loaded and freeze the
+// localhost fallback forever — which is exactly the prod bug this fixes.
+const resolveFrontendUrl = () =>
   process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
 
 /**
@@ -34,7 +40,7 @@ export const revalidatePublicContent = async (tags) => {
     return { ok: true, skipped: true };
   }
 
-  const url = `${FRONTEND_URL.replace(/\/+$/, '')}/api/revalidate`;
+  const url = `${resolveFrontendUrl().replace(/\/+$/, '')}/api/revalidate`;
 
   try {
     // Guard against a hung frontend taking down the admin response path.
