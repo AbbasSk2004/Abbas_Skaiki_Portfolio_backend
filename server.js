@@ -29,19 +29,19 @@ dotenv.config();
 // Make the resolved revalidation config observable at boot so a misconfigured
 // VM (e.g. FRONTEND_URL still pointing at localhost) is obvious in `pm2 logs`
 // instead of silently pinging the wrong host. Never print the secret value.
-console.log(
+/*console.log(
   '[boot] FRONTEND_URL=%s  REVALIDATE_SECRET=%s',
-  process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || '(default localhost:3000)',
+  process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN ,
   process.env.REVALIDATE_SECRET ? 'set' : 'MISSING'
-);
+);*/
 
 const app = express();
 
 // --- Core security & parsing middlewares ---
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
-    credentials: true, // allow cookies to be sent cross-origin
+    origin: process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL,
+    credentials: true,
   })
 );
 app.use(express.json({ limit: '10mb' }));

@@ -78,7 +78,7 @@ export const revalidatePublicContent = async (tags) => {
       console.error(`[revalidate] ${msg} for ${url} — ${body}`);
       return { ok: false, status: res.status, error: msg, body };
     }
-    console.log(`[revalidate] ok ${res.status} ${url}`);
+    
     return { ok: true, status: res.status };
   } catch (error) {
     // Network error, abort/timeout — log and move on. The DB write already
