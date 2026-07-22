@@ -37,13 +37,37 @@ dotenv.config();
 
 const app = express();
 
+// Trust the reverse proxy (nginx/Caddy on the GCP VM, and Cloud Load Balancer)
+// so secure cookies, req.protocol, and rate-limit IPs are correct behind it.
+app.set('trust proxy', 1);
+
+// --- CORS ---
+// Allow a COMMA-SEPARATED list of origins from env (no hardcoded URLs), so the
+// Vercel production domain AND preview deployments can all be permitted, e.g.
+//   CLIENT_ORIGIN=https://skaikidev.vercel.app,https://skaikidev-git-*.vercel.app
+// A bare "*" entry disables the allowlist (dev only). Requests with no Origin
+// (curl, server-to-server, health checks) are always allowed.
+const allowedOrigins = (process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) return callback(null, true); // non-browser / same-origin
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    // Reject WITHOUT throwing: the request proceeds without CORS headers, the
+    // browser blocks it, and we get a clear server log instead of a 500.
+    console.warn(`[cors] Blocked origin: ${origin}`);
+    return callback(null, false);
+  },
+  credentials: true,
+};
+
 // --- Core security & parsing middlewares ---
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL,
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

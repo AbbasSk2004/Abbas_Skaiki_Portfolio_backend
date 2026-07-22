@@ -20,6 +20,24 @@ export const globalErrorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal server error';
 
+  // Multer upload errors (file too large, too many files, unexpected field).
+  // Without this they'd surface as an opaque 500 — or, when a proxy/AV drops the
+  // oversized body first, as a "Failed to fetch"/CORS error in the browser with
+  // no usable message. Turning them into a clean 413/400 means the admin UI can
+  // show "File too large" instead of a misleading network/CORS failure.
+  if (err.name === 'MulterError') {
+    statusCode = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    message =
+      err.code === 'LIMIT_FILE_SIZE'
+        ? 'Image is too large. Please use a file under 5 MB.'
+        : `Upload error: ${err.message}`;
+  }
+
+  // Our own fileFilter rejection (non-image upload).
+  if (err.message === 'Only image files are allowed') {
+    statusCode = 400;
+  }
+
   // Mongoose validation errors
   if (err.name === 'ValidationError') {
     statusCode = 400;
