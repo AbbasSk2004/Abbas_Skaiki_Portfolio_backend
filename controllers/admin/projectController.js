@@ -31,6 +31,21 @@ const galleryUrls = (req) => fieldUrls(req, 'images');
 // The single cover image, or null when none was uploaded this request.
 const coverUrl = (req) => fieldUrls(req, 'coverImage')[0] ?? null;
 
+// When a request arrives as multipart/form-data (i.e. an image was attached),
+// FormData can only carry strings — so the client JSON-stringifies array fields
+// like `tags` / `stack` before appending them. Parse them back into real arrays
+// before they reach Mongoose, otherwise the [String] schema stores the whole
+// JSON blob as a single element (["[\"UI/UX DESIGN\"]"]). On a plain JSON
+// request the value is already an array and passes through untouched.
+const parseArrayField = (field) => {
+  if (typeof field !== 'string') return field;
+  try {
+    return JSON.parse(field);
+  } catch {
+    return field.split(',').map((item) => item.trim()).filter(Boolean);
+  }
+};
+
 // GET /api/admin/projects — list all (admin view, no ISR/caching concerns).
 export const listProjects = catchAsync(async (req, res) => {
   const projects = await Project.find().sort({ createdAt: -1 });
@@ -69,6 +84,10 @@ export const createProject = catchAsync(async (req, res) => {
   // in the body (e.g. an external link). Never let the raw body value survive if
   // a file was uploaded.
   const coverImage = uploadedCover ?? req.body.coverImage ?? '';
+
+  // Intercept FormData-stringified arrays and parse them back before saving.
+  if (req.body.tags) req.body.tags = parseArrayField(req.body.tags);
+  if (req.body.stack) req.body.stack = parseArrayField(req.body.stack);
 
   try {
     const project = await Project.create({ ...req.body, coverImage, images });
@@ -114,6 +133,10 @@ export const updateProject = catchAsync(async (req, res) => {
   const nextCover =
     uploadedCover ??
     (req.body.coverImage !== undefined ? req.body.coverImage : existing.coverImage);
+
+  // Intercept FormData-stringified arrays and parse them back before saving.
+  if (req.body.tags) req.body.tags = parseArrayField(req.body.tags);
+  if (req.body.stack) req.body.stack = parseArrayField(req.body.stack);
 
   try {
     const project = await Project.findByIdAndUpdate(
